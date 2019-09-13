@@ -55,6 +55,7 @@ generate_dynamic_reconfigure_options(
   cfg/GenericPlugin.cfg
   cfg/InflationPlugin.cfg
   cfg/VoxelPlugin.cfg
+  cfg/KiwiPlugin.cfg
 )
 
 catkin_package(
@@ -105,6 +106,7 @@ add_library(layers
   plugins/obstacle_layer.cpp
   plugins/static_layer.cpp
   plugins/voxel_layer.cpp
+  plugins/kiwi_layer.cpp
   src/observation_buffer.cpp
 )
 add_dependencies(layers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
