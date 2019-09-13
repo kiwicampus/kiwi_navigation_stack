@@ -68,7 +68,8 @@ void ObstacleLayer::onInitialize()
 
   ObstacleLayer::matchSize();
   current_ = true;
-
+  
+  // Parameter namespace: /move_base/local_costmap/obstacle_layer/...
   global_frame_ = layered_costmap_->getGlobalFrameID();
   double transform_tolerance;
   nh.param("transform_tolerance", transform_tolerance, 0.2);
@@ -91,6 +92,7 @@ void ObstacleLayer::onInitialize()
     std::string topic, sensor_frame, data_type;
     bool inf_is_valid, clearing, marking;
 
+    // Parameter namespace: /move_base/local_costmap/obstacle_layer/scan/...
     source_node.param("topic", topic, source);
     source_node.param("sensor_frame", sensor_frame, std::string(""));
     source_node.param("observation_persistence", observation_keep_time, 0.0);
@@ -111,6 +113,9 @@ void ObstacleLayer::onInitialize()
     std::string raytrace_range_param_name, obstacle_range_param_name;
 
     // get the obstacle range for the sensor
+    // The next two parameters are from the namespace
+    // /move_base/local_costmap/obstacle_layer/...
+
     double obstacle_range = 2.5;
     if (source_node.searchParam("obstacle_range", obstacle_range_param_name))
     {
