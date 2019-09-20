@@ -116,6 +116,9 @@ void KiwiLayer::resetMaps()
 void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                        double* min_y, double* max_x, double* max_y)
 {
+  // RDEUBER: We don't care about the costmap in the back of the robot (because
+  // there are no sensor measuremtns anyway). CHANGE THAT here and everywhere
+  // else! 
   if (rolling_window_)
     updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
   if (!enabled_)
@@ -127,11 +130,13 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
 
   // get the marking observations
   current = getMarkingObservations(observations) && current;
+  ROS_ERROR_STREAM("Number of pointclouds for marking: " << observations.size());
 
   // get the clearing observations
   current = getClearingObservations(clearing_observations) && current;
 
   // update the global current status
+  ROS_ERROR_STREAM("Number of pointclouds for clearing: " << clearing_observations.size());
   current_ = current;
 
   // raytrace freespace
@@ -177,6 +182,14 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
       }
       else if (!worldToMap3D(*iter_x, *iter_y, *iter_z, mx, my, mz))
       {
+        continue;
+      }
+
+        // RDEUBER: Mark the plane as FREE_SPACE and continue
+      if ((*iter_z < 0.05) && ((*iter_z > -0.05)))
+      {
+        unsigned int index = getIndex(mx, my);
+        costmap_[index] = FREE_SPACE;
         continue;
       }
 

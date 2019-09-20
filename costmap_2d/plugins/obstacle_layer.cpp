@@ -92,7 +92,7 @@ void ObstacleLayer::onInitialize()
     std::string topic, sensor_frame, data_type;
     bool inf_is_valid, clearing, marking;
 
-    // Parameter namespace: /move_base/local_costmap/obstacle_layer/scan/...
+    // Parameter namespace: /move_base/local_costmap/obstacle_layer/[scan_topic]/...
     source_node.param("topic", topic, source);
     source_node.param("sensor_frame", sensor_frame, std::string(""));
     source_node.param("observation_persistence", observation_keep_time, 0.0);
@@ -196,9 +196,10 @@ void ObstacleLayer::onInitialize()
     }
     else
     {
+      // RDEUBER: The buffer size (now 1, initially 50) must be set once the
+      // costmap generation is finished.
       boost::shared_ptr < message_filters::Subscriber<sensor_msgs::PointCloud2>
-          > sub(new message_filters::Subscriber<sensor_msgs::PointCloud2>(g_nh, topic, 50));
-
+          > sub(new message_filters::Subscriber<sensor_msgs::PointCloud2>(g_nh, topic, 1));
       if (inf_is_valid)
       {
        ROS_WARN("obstacle_layer: inf_is_valid option is not applicable to PointCloud observations.");
