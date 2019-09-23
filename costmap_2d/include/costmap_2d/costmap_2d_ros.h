@@ -49,6 +49,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <pluginlib/class_loader.hpp>
 #include <tf2/LinearMath/Transform.h>
+#include <kiwi_navigation_tools/kiwi_parameter_loader.h>
 
 class SuperValue : public XmlRpc::XmlRpcValue
 {

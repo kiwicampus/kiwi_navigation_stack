@@ -55,6 +55,9 @@ void move_parameter(ros::NodeHandle& old_h, ros::NodeHandle& new_h, std::string 
   if (!old_h.hasParam(name))
     return;
 
+  ROS_ERROR_STREAM("Old-style parameter detected: " << name << 
+    " ; old namespace: " << old_h.getNamespace() << " ; new namespace: "
+    << new_h.getNamespace());
   XmlRpc::XmlRpcValue value;
   old_h.getParam(name, value);
   new_h.setParam(name, value);
@@ -83,10 +86,13 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
 
   ros::NodeHandle private_nh("~/" + name);
   ros::NodeHandle g_nh;
+  kiwi_parameter_loader::KiwiParameterLoader  parameter_loader_private(private_nh);
 
   // get global and robot base frame names
-  private_nh.param("global_frame", global_frame_, std::string("map"));
-  private_nh.param("robot_base_frame", robot_base_frame_, std::string("base_link"));
+  parameter_loader_private.LoadParameter("global_frame", global_frame_,
+    std::string("map"));
+  parameter_loader_private.LoadParameter("robot_base_frame", robot_base_frame_,
+    std::string("base_link"));
 
   ros::Time last_error = ros::Time::now();
   std::string tf_error;
@@ -109,9 +115,12 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   // check if we want a rolling window version of the costmap
   // namespace: /move_base/local_costmap/...
   bool rolling_window, track_unknown_space, always_send_full_costmap;
-  private_nh.param("rolling_window", rolling_window, false);
-  private_nh.param("track_unknown_space", track_unknown_space, false);
-  private_nh.param("always_send_full_costmap", always_send_full_costmap, false);
+  parameter_loader_private.LoadParameter("rolling_window", rolling_window,
+    false);
+  parameter_loader_private.LoadParameter("track_unknown_space",
+    track_unknown_space, false);
+  parameter_loader_private.LoadParameter("always_send_full_costmap",
+    always_send_full_costmap, false);
 
   layered_costmap_ = new LayeredCostmap(global_frame_, rolling_window, track_unknown_space);
 
@@ -146,16 +155,16 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   {
     topic_param = "footprint_topic";
   }
-
-  private_nh.param(topic_param, topic, std::string("footprint"));
+  parameter_loader_private.LoadParameter(topic_param, topic,
+    std::string("footprint"));
   footprint_sub_ = private_nh.subscribe(topic, 1, &Costmap2DROS::setUnpaddedRobotFootprintPolygon, this);
 
   if (!private_nh.searchParam("published_footprint_topic", topic_param))
   {
     topic_param = "published_footprint";
   }
-
-  private_nh.param(topic_param, topic, std::string("oriented_footprint"));
+  parameter_loader_private.LoadParameter(topic_param, topic,
+    std::string("oriented_footprint"));
   footprint_pub_ = private_nh.advertise<geometry_msgs::PolygonStamped>("footprint", 1);
 
   setUnpaddedRobotFootprint(makeFootprintFromParams(private_nh));
@@ -205,6 +214,9 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
   std::string s;
   std::vector < XmlRpc::XmlRpcValue > plugins;
 
+  kiwi_parameter_loader::KiwiParameterLoader 
+    parameter_loader_old_parameters(nh);
+
   XmlRpc::XmlRpcValue::ValueStruct map;
   SuperValue super_map;
   SuperValue super_array;
@@ -250,7 +262,8 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
   move_parameter(nh, obstacles, "raytrace_range");
   move_parameter(nh, obstacles, "obstacle_range");
   move_parameter(nh, obstacles, "track_unknown_space", true);
-  nh.param("observation_sources", s, std::string(""));
+  parameter_loader_old_parameters.LoadParameter("observation_sources", s,
+    std::string(""));
   std::stringstream ss(s);
   std::string source;
   while (ss >> source)

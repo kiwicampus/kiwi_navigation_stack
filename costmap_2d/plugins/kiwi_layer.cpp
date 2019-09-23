@@ -57,6 +57,9 @@ void KiwiLayer::onInitialize()
   ObstacleLayer::onInitialize();
   ros::NodeHandle private_nh("~/" + name_);
 
+  kiwi_parameter_loader::KiwiParameterLoader instance(private_nh);
+  instance.LoadParameter("publish_voxel_map", publish_voxel_, false);
+
   private_nh.param("publish_voxel_map", publish_voxel_, false);
   if (publish_voxel_)
     voxel_pub_ = private_nh.advertise < costmap_2d::VoxelGrid > ("voxel_grid", 1);
@@ -130,13 +133,11 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
 
   // get the marking observations
   current = getMarkingObservations(observations) && current;
-  ROS_ERROR_STREAM("Number of pointclouds for marking: " << observations.size());
 
   // get the clearing observations
   current = getClearingObservations(clearing_observations) && current;
 
   // update the global current status
-  ROS_ERROR_STREAM("Number of pointclouds for clearing: " << clearing_observations.size());
   current_ = current;
 
   // raytrace freespace

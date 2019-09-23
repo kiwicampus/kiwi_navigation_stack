@@ -54,6 +54,7 @@
 #include <costmap_2d/KiwiPluginConfig.h>
 #include <costmap_2d/obstacle_layer.h>
 #include <voxel_grid/voxel_grid.h>
+#include <kiwi_navigation_tools/kiwi_parameter_loader.h>
 
 namespace costmap_2d
 {

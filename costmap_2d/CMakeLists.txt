@@ -6,6 +6,7 @@ find_package(catkin REQUIRED
             cmake_modules
             dynamic_reconfigure
             geometry_msgs
+            kiwi_navigation_tools
             laser_geometry
             map_msgs
             message_filters
@@ -66,6 +67,7 @@ catkin_package(
     CATKIN_DEPENDS
         dynamic_reconfigure
         geometry_msgs
+        kiwi_navigation_tools
         laser_geometry
         map_msgs
         message_filters
