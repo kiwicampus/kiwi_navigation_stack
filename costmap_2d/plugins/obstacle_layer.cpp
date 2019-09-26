@@ -344,10 +344,17 @@ void ObstacleLayer::pointCloudCallback(const sensor_msgs::PointCloudConstPtr& me
 void ObstacleLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& message,
                                                 const boost::shared_ptr<ObservationBuffer>& buffer)
 {
+  ros::WallTime start_update_bounds, end_update_bounds;
+  start_update_bounds = ros::WallTime::now();
+
   // buffer the point cloud
   buffer->lock();
   buffer->bufferCloud(*message);
   buffer->unlock();
+
+  end_update_bounds = ros::WallTime::now();
+  double execution_time = (end_update_bounds - start_update_bounds).toNSec() * 1e-6;
+  ROS_WARN_STREAM("pointcloud callback (ms): " << execution_time);
 }
 
 void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
