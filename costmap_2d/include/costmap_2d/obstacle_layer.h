@@ -55,6 +55,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <costmap_2d/ObstaclePluginConfig.h>
 #include <costmap_2d/footprint.h>
+#include <kiwi_navigation_tools/kiwi_parameter_loader.h>
 
 namespace costmap_2d
 {

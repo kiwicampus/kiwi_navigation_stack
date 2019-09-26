@@ -6,6 +6,7 @@ find_package(catkin REQUIRED
             cmake_modules
             dynamic_reconfigure
             geometry_msgs
+            kiwi_navigation_tools
             laser_geometry
             map_msgs
             message_filters
@@ -55,6 +56,7 @@ generate_dynamic_reconfigure_options(
   cfg/GenericPlugin.cfg
   cfg/InflationPlugin.cfg
   cfg/VoxelPlugin.cfg
+  cfg/KiwiPlugin.cfg
 )
 
 catkin_package(
@@ -65,6 +67,7 @@ catkin_package(
     CATKIN_DEPENDS
         dynamic_reconfigure
         geometry_msgs
+        kiwi_navigation_tools
         laser_geometry
         map_msgs
         message_filters
@@ -105,6 +108,7 @@ add_library(layers
   plugins/obstacle_layer.cpp
   plugins/static_layer.cpp
   plugins/voxel_layer.cpp
+  plugins/kiwi_layer.cpp
   src/observation_buffer.cpp
 )
 add_dependencies(layers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

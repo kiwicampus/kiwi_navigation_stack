@@ -57,10 +57,12 @@ namespace costmap_2d
 void ObstacleLayer::onInitialize()
 {
   ros::NodeHandle nh("~/" + name_), g_nh;
+  kiwi_parameter_loader::KiwiParameterLoader  parameter_loader(nh);
   rolling_window_ = layered_costmap_->isRolling();
 
   bool track_unknown_space;
-  nh.param("track_unknown_space", track_unknown_space, layered_costmap_->isTrackingUnknown());
+  parameter_loader.LoadParameter("track_unknown_space", track_unknown_space,
+    layered_costmap_->isTrackingUnknown());
   if (track_unknown_space)
     default_value_ = NO_INFORMATION;
   else
@@ -68,14 +70,17 @@ void ObstacleLayer::onInitialize()
 
   ObstacleLayer::matchSize();
   current_ = true;
-
+  
+  // Parameter namespace: /move_base/local_costmap/obstacle_layer/...
   global_frame_ = layered_costmap_->getGlobalFrameID();
   double transform_tolerance;
-  nh.param("transform_tolerance", transform_tolerance, 0.2);
+  parameter_loader.LoadParameter("transform_tolerance", transform_tolerance,
+    0.2);
 
-  std::string topics_string;
   // get the topics that we'll subscribe to from the parameter server
-  nh.param("observation_sources", topics_string, std::string(""));
+  std::string topics_string;
+  parameter_loader.LoadParameter("observation_sources", topics_string,
+    std::string(""));
   ROS_INFO("    Subscribed to Topics: %s", topics_string.c_str());
 
   // now we need to split the topics based on whitespace which we can use a stringstream for
@@ -85,22 +90,32 @@ void ObstacleLayer::onInitialize()
   while (ss >> source)
   {
     ros::NodeHandle source_node(nh, source);
+    kiwi_parameter_loader::KiwiParameterLoader 
+      parameter_loader_source_node(nh);
 
     // get the parameters for the specific topic
     double observation_keep_time, expected_update_rate, min_obstacle_height, max_obstacle_height;
     std::string topic, sensor_frame, data_type;
     bool inf_is_valid, clearing, marking;
 
-    source_node.param("topic", topic, source);
-    source_node.param("sensor_frame", sensor_frame, std::string(""));
-    source_node.param("observation_persistence", observation_keep_time, 0.0);
-    source_node.param("expected_update_rate", expected_update_rate, 0.0);
-    source_node.param("data_type", data_type, std::string("PointCloud"));
-    source_node.param("min_obstacle_height", min_obstacle_height, 0.0);
-    source_node.param("max_obstacle_height", max_obstacle_height, 2.0);
-    source_node.param("inf_is_valid", inf_is_valid, false);
-    source_node.param("clearing", clearing, false);
-    source_node.param("marking", marking, true);
+    // Parameter namespace: /move_base/local_costmap/obstacle_layer/[scan_topic]/...
+    parameter_loader_source_node.LoadParameter("topic", topic, source);
+    parameter_loader_source_node.LoadParameter("sensor_frame", sensor_frame,
+      std::string(""));
+    parameter_loader_source_node.LoadParameter("observation_persistence",
+      observation_keep_time, 0.0);
+    parameter_loader_source_node.LoadParameter("expected_update_rate",
+      expected_update_rate, 0.0);
+    parameter_loader_source_node.LoadParameter("data_type", data_type,
+      std::string("PointCloud"));
+    parameter_loader_source_node.LoadParameter("min_obstacle_height",
+      min_obstacle_height, 0.0);
+    parameter_loader_source_node.LoadParameter("max_obstacle_height",
+      max_obstacle_height, 2.0);
+    parameter_loader_source_node.LoadParameter("inf_is_valid", inf_is_valid,
+      false);
+    parameter_loader_source_node.LoadParameter("clearing", clearing, false);
+    parameter_loader_source_node.LoadParameter("marking", marking, true);
 
     if (!(data_type == "PointCloud2" || data_type == "PointCloud" || data_type == "LaserScan"))
     {
@@ -111,18 +126,22 @@ void ObstacleLayer::onInitialize()
     std::string raytrace_range_param_name, obstacle_range_param_name;
 
     // get the obstacle range for the sensor
-    double obstacle_range = 2.5;
-    if (source_node.searchParam("obstacle_range", obstacle_range_param_name))
-    {
-      source_node.getParam(obstacle_range_param_name, obstacle_range);
-    }
+    // The next two parameters are from the namespace
+    // /move_base/local_costmap/obstacle_layer/...
+    double obstacle_range;
+    source_node.searchParam("obstacle_range", obstacle_range_param_name);
+    parameter_loader_source_node.LoadParameter(
+      obstacle_range_param_name.substr(
+        obstacle_range_param_name.find_last_of("/")+1),
+      obstacle_range, 2.5);
 
     // get the raytrace range for the sensor
-    double raytrace_range = 3.0;
-    if (source_node.searchParam("raytrace_range", raytrace_range_param_name))
-    {
-      source_node.getParam(raytrace_range_param_name, raytrace_range);
-    }
+    double raytrace_range;
+    source_node.searchParam("raytrace_range", raytrace_range_param_name);
+    parameter_loader_source_node.LoadParameter(
+      raytrace_range_param_name.substr(
+        raytrace_range_param_name.find_last_of("/")+1),
+      raytrace_range, 3.0);
 
     ROS_DEBUG("Creating an observation buffer for source %s, topic %s, frame %s", source.c_str(), topic.c_str(),
               sensor_frame.c_str());
@@ -191,9 +210,10 @@ void ObstacleLayer::onInitialize()
     }
     else
     {
+      // RDEUBER: The buffer size (now 1, initially 50) must be set once the
+      // costmap generation is finished.
       boost::shared_ptr < message_filters::Subscriber<sensor_msgs::PointCloud2>
-          > sub(new message_filters::Subscriber<sensor_msgs::PointCloud2>(g_nh, topic, 50));
-
+          > sub(new message_filters::Subscriber<sensor_msgs::PointCloud2>(g_nh, topic, 1));
       if (inf_is_valid)
       {
        ROS_WARN("obstacle_layer: inf_is_valid option is not applicable to PointCloud observations.");
