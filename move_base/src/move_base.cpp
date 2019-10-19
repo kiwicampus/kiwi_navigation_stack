@@ -133,7 +133,6 @@ namespace move_base {
     //create the ros wrapper for the planner's costmap... and initializer a pointer we'll use with the underlying map
     planner_costmap_ros_ = new costmap_2d::Costmap2DROS("global_costmap", tf_);
     planner_costmap_ros_->pause();
-    ROS_ERROR("RDEUBER: reached global planner initialization.");
     //initialize the global planner
     try {
       planner_ = bgp_loader_.createInstance(global_planner);
@@ -142,12 +141,11 @@ namespace move_base {
       ROS_FATAL("Failed to create the %s planner, are you sure it is properly registered and that the containing library is built? Exception: %s", global_planner.c_str(), ex.what());
       exit(1);
     }
-    ROS_ERROR("RDEUBER: global planner created.");
 
     //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
     controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
     controller_costmap_ros_->pause();
-    ROS_ERROR("RDEUBER: reached local planner initialization.");
+       
     //create a local planner
     try {
       tc_ = blp_loader_.createInstance(local_planner);
@@ -157,13 +155,10 @@ namespace move_base {
       ROS_FATAL("Failed to create the %s planner, are you sure it is properly registered and that the containing library is built? Exception: %s", local_planner.c_str(), ex.what());
       exit(1);
     }
-    ROS_ERROR("RDEUBER: local planner created.");
 
     // Start actively updating costmaps based on sensor data
     planner_costmap_ros_->start();
     controller_costmap_ros_->start();
-
-    ROS_ERROR("RDEUBER: started local and global costmap.");
 
     //advertise a service for getting a plan
     make_plan_srv_ = private_nh.advertiseService("make_plan", &MoveBase::planService, this);
