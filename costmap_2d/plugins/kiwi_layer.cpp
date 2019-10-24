@@ -190,10 +190,16 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
       }
 
         // RDEUBER: Mark the plane as FREE_SPACE and continue
-      if ((*iter_z < 0.05) && ((*iter_z > -0.05)))
+      if ((*iter_z < 0.15) && ((*iter_z > -0.15)))
       {
         unsigned int index = getIndex(mx, my);
         costmap_[index] = FREE_SPACE;
+        continue;
+      }
+
+      // RDEUBER: Remove points that are under the plane
+      if (*iter_z < 0.0)
+      {
         continue;
       }
 
