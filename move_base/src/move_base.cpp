@@ -42,6 +42,7 @@
 #include <boost/thread.hpp>
 
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -101,7 +102,7 @@ namespace move_base {
     planner_thread_ = new boost::thread(boost::bind(&MoveBase::planThread, this));
 
     //for commanding the base
-    vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+    vel_pub_ = nh.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1);
     current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("current_goal", 0 );
 
     ros::NodeHandle action_nh("move_base");
@@ -508,11 +509,15 @@ namespace move_base {
   }
 
   void MoveBase::publishZeroVelocity(){
-    geometry_msgs::Twist cmd_vel;
-    cmd_vel.linear.x = 0.0;
-    cmd_vel.linear.y = 0.0;
-    cmd_vel.angular.z = 0.0;
-    vel_pub_.publish(cmd_vel);
+    geometry_msgs::Twist cmd_vel_stamped;
+    cmd_vel_stamped.linear.x = 0.0;
+    cmd_vel_stamped.linear.y = 0.0;
+    cmd_vel_stamped.angular.z = 0.0;
+    // geometry_msgs::Twist cmd_vel;
+    // cmd_vel.linear.x = 0.0;
+    // cmd_vel.linear.y = 0.0;
+    // cmd_vel.angular.z = 0.0;
+    vel_pub_.publish(cmd_vel_stamped);
   }
 
   bool MoveBase::isQuaternionValid(const geometry_msgs::Quaternion& q){
@@ -921,7 +926,11 @@ namespace move_base {
                            cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z );
           last_valid_control_ = ros::Time::now();
           //make sure that we send the velocity command to the base
-          vel_pub_.publish(cmd_vel);
+          geometry_msgs::Twist cmd_vel_stamped;
+          cmd_vel_stamped.linear.x = cmd_vel.linear.x;
+          cmd_vel_stamped.linear.y = cmd_vel.linear.y;
+          cmd_vel_stamped.angular.z = cmd_vel.angular.z;
+          vel_pub_.publish(cmd_vel_stamped);
           if(recovery_trigger_ == CONTROLLING_R)
             recovery_index_ = 0;
         }
