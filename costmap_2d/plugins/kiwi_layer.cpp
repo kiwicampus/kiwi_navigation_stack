@@ -189,6 +189,10 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
         continue;
       }
 
+      //ONLY TEMPORARY!!!!!!!!!!!!!!!!!!!!!
+      continue;
+      //ONLY TEMPORARY!!!!!!!!!!!!!!!!!!!!!
+
         // RDEUBER: Mark the plane as FREE_SPACE and continue
       if ((*iter_z < 0.15) && ((*iter_z > -0.15)))
       {
