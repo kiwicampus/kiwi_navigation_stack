@@ -509,10 +509,10 @@ namespace move_base {
   }
 
   void MoveBase::publishZeroVelocity(){
-    geometry_msgs::Twist cmd_vel_stamped;
-    cmd_vel_stamped.linear.x = 0.0;
-    cmd_vel_stamped.linear.y = 0.0;
-    cmd_vel_stamped.angular.z = 0.0;
+    geometry_msgs::TwistStamped cmd_vel_stamped;
+    cmd_vel_stamped.twist.linear.x = 0.0;
+    cmd_vel_stamped.twist.linear.y = 0.0;
+    cmd_vel_stamped.twist.angular.z = 0.0;
     // geometry_msgs::Twist cmd_vel;
     // cmd_vel.linear.x = 0.0;
     // cmd_vel.linear.y = 0.0;
@@ -926,10 +926,10 @@ namespace move_base {
                            cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z );
           last_valid_control_ = ros::Time::now();
           //make sure that we send the velocity command to the base
-          geometry_msgs::Twist cmd_vel_stamped;
-          cmd_vel_stamped.linear.x = cmd_vel.linear.x;
-          cmd_vel_stamped.linear.y = cmd_vel.linear.y;
-          cmd_vel_stamped.angular.z = cmd_vel.angular.z;
+          geometry_msgs::TwistStamped cmd_vel_stamped;
+          cmd_vel_stamped.twist.linear.x = cmd_vel.linear.x;
+          cmd_vel_stamped.twist.linear.y = cmd_vel.linear.y;
+          cmd_vel_stamped.twist.angular.z = cmd_vel.angular.z;
           vel_pub_.publish(cmd_vel_stamped);
           if(recovery_trigger_ == CONTROLLING_R)
             recovery_index_ = 0;
