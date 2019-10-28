@@ -40,6 +40,7 @@
 #include <tf2/utils.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Point.h>
 #include <angles/angles.h>
 #include <algorithm>
@@ -107,7 +108,7 @@ void RotateRecovery::runBehavior()
 
   ros::Rate r(frequency_);
   ros::NodeHandle n;
-  ros::Publisher vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 10);
+  ros::Publisher vel_pub = n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 10);
 
   geometry_msgs::PoseStamped global_pose;
   local_costmap_->getRobotPose(global_pose);
@@ -170,10 +171,10 @@ void RotateRecovery::runBehavior()
     // make sure that this velocity falls within the specified limits
     vel = std::min(std::max(vel, min_rotational_vel_), max_rotational_vel_);
 
-    geometry_msgs::Twist cmd_vel;
-    cmd_vel.linear.x = 0.0;
-    cmd_vel.linear.y = 0.0;
-    cmd_vel.angular.z = vel;
+    geometry_msgs::TwistStamped cmd_vel;
+    cmd_vel.twist.linear.x = 0.0;
+    cmd_vel.twist.linear.y = 0.0;
+    cmd_vel.twist.angular.z = vel;
 
     vel_pub.publish(cmd_vel);
 
