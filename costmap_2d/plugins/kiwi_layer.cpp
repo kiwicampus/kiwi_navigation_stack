@@ -243,7 +243,7 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
   updateFootprint(robot_x, robot_y, robot_yaw, min_x, min_y, max_x, max_y);
   end_update_bounds = ros::WallTime::now();
   double execution_time = (end_update_bounds - start_update_bounds).toNSec() * 1e-6;
-  ROS_WARN_STREAM("gridmap generation (ms): " << execution_time);
+  // ROS_WARN_STREAM("gridmap generation (ms): " << execution_time);
 }
 
 void KiwiLayer::clearNonLethal(double wx, double wy, double w_size_x, double w_size_y, bool clear_no_info)
