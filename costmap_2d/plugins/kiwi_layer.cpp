@@ -190,7 +190,7 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
       }
 
       //ONLY TEMPORARY!!!!!!!!!!!!!!!!!!!!!
-      continue;
+      //continue;
       //ONLY TEMPORARY!!!!!!!!!!!!!!!!!!!!!
 
         // RDEUBER: Mark the plane as FREE_SPACE and continue
