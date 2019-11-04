@@ -780,6 +780,10 @@ namespace move_base {
       //the real work on pursuing a goal is done here
       bool done = executeCycle(goal, global_plan);
 
+      // RDEUBER: We want to reset the costmaps after every control cycle.
+      std_srvs::Empty emptymsg;
+      ros::service::call("/move_base/clear_costmaps",emptymsg);
+    
       //if we're done, then we'll return from execute
       if(done)
         return;
