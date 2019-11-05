@@ -191,6 +191,8 @@ namespace move_base {
     dsrv_ = new dynamic_reconfigure::Server<move_base::MoveBaseConfig>(ros::NodeHandle("~"));
     dynamic_reconfigure::Server<move_base::MoveBaseConfig>::CallbackType cb = boost::bind(&MoveBase::reconfigureCB, this, _1, _2);
     dsrv_->setCallback(cb);
+
+    cycle_counter_ = 0;
   }
 
   void MoveBase::reconfigureCB(move_base::MoveBaseConfig &config, uint32_t level){
@@ -781,8 +783,13 @@ namespace move_base {
       bool done = executeCycle(goal, global_plan);
 
       // RDEUBER: We want to reset the costmaps after every control cycle.
-      std_srvs::Empty emptymsg;
-      ros::service::call("/move_base/clear_costmaps",emptymsg);
+      cycle_counter_++;
+      if (cycle_counter_ == 20){
+        std_srvs::Empty emptymsg;
+        ros::service::call("/move_base/clear_costmaps",emptymsg);
+        cycle_counter_ = 0;
+      }
+      
     
       //if we're done, then we'll return from execute
       if(done)
