@@ -783,12 +783,13 @@ namespace move_base {
       bool done = executeCycle(goal, global_plan);
 
       // RDEUBER: We want to reset the costmaps after every control cycle.
+      /*
       cycle_counter_++;
       if (cycle_counter_ == 20){
         std_srvs::Empty emptymsg;
         ros::service::call("/move_base/clear_costmaps",emptymsg);
         cycle_counter_ = 0;
-      }
+      } */
       
     
       //if we're done, then we'll return from execute

@@ -205,12 +205,6 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
       }
       */
 
-      // RDEUBER: Remove points that are under the plane
-      if (*iter_z < 0.0)
-      {
-        continue;
-      }
-
       // mark the cell in the voxel grid and check if we should also mark it in the costmap
       if (voxel_grid_.markVoxelInMap(mx, my, mz, mark_threshold_))
       {
