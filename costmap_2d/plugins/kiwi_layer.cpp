@@ -126,7 +126,8 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
   // there are no sensor measuremtns anyway). CHANGE THAT here and everywhere
   // else! 
   if (rolling_window_)
-    updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
+    updateOrigin(robot_x - 1.0, robot_y - getSizeInMetersY() / 2);
+    // updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
   if (!enabled_)
     return;
   useExtraBounds(min_x, min_y, max_x, max_y);
