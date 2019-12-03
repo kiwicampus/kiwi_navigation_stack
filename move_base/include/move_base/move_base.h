@@ -58,6 +58,7 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "move_base/MoveBaseConfig.h"
+#include <kiwi_navigation_tools/kiwi_parameter_loader.h>
 
 namespace move_base {
   //typedefs to help us out with the action server so that we don't hace to type so much

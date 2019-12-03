@@ -158,11 +158,8 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
     std::vector<unsigned char>::iterator iter_obs = observation_cloud.data.begin();
     for (; iter_global != iter_global_end; ++iter_z, iter_global += global_frame_cloud.point_step)
     {
-      // RDEUBER: The points of the pointcloud that were below the threshold
-      // min_obstacle_height were originally removed here. 
-
-      if ((*iter_z) <= max_obstacle_height_ )
-          // && (*iter_z) >= min_obstacle_height_)
+      if ((*iter_z) <= max_obstacle_height_ 
+          && (*iter_z) >= min_obstacle_height_)
       {
         std::copy(iter_global, iter_global + global_frame_cloud.point_step, iter_obs);
         iter_obs += global_frame_cloud.point_step;

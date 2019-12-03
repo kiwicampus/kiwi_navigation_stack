@@ -42,6 +42,7 @@
 #include <boost/thread.hpp>
 
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -61,23 +62,36 @@ namespace move_base {
 
     ros::NodeHandle private_nh("~");
     ros::NodeHandle nh;
+    kiwi_parameter_loader::KiwiParameterLoader
+      parameter_loader_private(private_nh);
 
     recovery_trigger_ = PLANNING_R;
 
     //get some parameters that will be global to the move base node
     std::string global_planner, local_planner;
-    private_nh.param("base_global_planner", global_planner, std::string("navfn/NavfnROS"));
-    private_nh.param("base_local_planner", local_planner, std::string("base_local_planner/TrajectoryPlannerROS"));
-    private_nh.param("global_costmap/robot_base_frame", robot_base_frame_, std::string("base_link"));
-    private_nh.param("global_costmap/global_frame", global_frame_, std::string("map"));
-    private_nh.param("planner_frequency", planner_frequency_, 0.0);
-    private_nh.param("controller_frequency", controller_frequency_, 20.0);
-    private_nh.param("planner_patience", planner_patience_, 5.0);
-    private_nh.param("controller_patience", controller_patience_, 15.0);
-    private_nh.param("max_planning_retries", max_planning_retries_, -1);  // disabled by default
+    parameter_loader_private.LoadParameter("base_global_planner", global_planner,
+      std::string("navfn/NavfnROS"));
+    parameter_loader_private.LoadParameter("base_local_planner", local_planner,
+      std::string("base_local_planner/TrajectoryPlannerROS"));
+    parameter_loader_private.LoadParameter("global_costmap/robot_base_frame",
+      robot_base_frame_, std::string("base_link"));
+    parameter_loader_private.LoadParameter("global_costmap/global_frame",
+      global_frame_, std::string("map"));
+    parameter_loader_private.LoadParameter("planner_frequency",
+      planner_frequency_, 0.0);
+    parameter_loader_private.LoadParameter("controller_frequency",
+      controller_frequency_, 20.0);
+    parameter_loader_private.LoadParameter("planner_patience",
+      planner_patience_, 5.0);
+    parameter_loader_private.LoadParameter("controller_patience",
+    controller_patience_, 15.0);
+    parameter_loader_private.LoadParameter("max_planning_retries",
+      max_planning_retries_, -1);  // disabled by default
 
-    private_nh.param("oscillation_timeout", oscillation_timeout_, 0.0);
-    private_nh.param("oscillation_distance", oscillation_distance_, 0.5);
+    parameter_loader_private.LoadParameter("oscillation_timeout",
+      oscillation_timeout_, 0.0);
+    parameter_loader_private.LoadParameter("oscillation_distance",
+      oscillation_distance_, 0.5);
 
     //set up plan triple buffer
     planner_plan_ = new std::vector<geometry_msgs::PoseStamped>();
@@ -88,7 +102,7 @@ namespace move_base {
     planner_thread_ = new boost::thread(boost::bind(&MoveBase::planThread, this));
 
     //for commanding the base
-    vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+    vel_pub_ = nh.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1);
     current_goal_pub_ = private_nh.advertise<geometry_msgs::PoseStamped>("current_goal", 0 );
 
     ros::NodeHandle action_nh("move_base");
@@ -101,19 +115,25 @@ namespace move_base {
     goal_sub_ = simple_nh.subscribe<geometry_msgs::PoseStamped>("goal", 1, boost::bind(&MoveBase::goalCB, this, _1));
 
     //we'll assume the radius of the robot to be consistent with what's specified for the costmaps
-    private_nh.param("local_costmap/inscribed_radius", inscribed_radius_, 0.325);
-    private_nh.param("local_costmap/circumscribed_radius", circumscribed_radius_, 0.46);
-    private_nh.param("clearing_radius", clearing_radius_, circumscribed_radius_);
-    private_nh.param("conservative_reset_dist", conservative_reset_dist_, 3.0);
+    parameter_loader_private.LoadParameter("local_costmap/inscribed_radius",
+      inscribed_radius_, 0.325);
+    parameter_loader_private.LoadParameter("local_costmap/circumscribed_radius",
+      circumscribed_radius_, 0.46);
+    parameter_loader_private.LoadParameter("clearing_radius",
+      clearing_radius_, circumscribed_radius_);
+    parameter_loader_private.LoadParameter("conservative_reset_dist",
+      conservative_reset_dist_, 3.0);
 
-    private_nh.param("shutdown_costmaps", shutdown_costmaps_, false);
-    private_nh.param("clearing_rotation_allowed", clearing_rotation_allowed_, true);
-    private_nh.param("recovery_behavior_enabled", recovery_behavior_enabled_, true);
+    parameter_loader_private.LoadParameter("shutdown_costmaps",
+      shutdown_costmaps_, false);
+    parameter_loader_private.LoadParameter("clearing_rotation_allowed",
+      clearing_rotation_allowed_, true);
+    parameter_loader_private.LoadParameter("recovery_behavior_enabled",
+      recovery_behavior_enabled_, true);
 
     //create the ros wrapper for the planner's costmap... and initializer a pointer we'll use with the underlying map
     planner_costmap_ros_ = new costmap_2d::Costmap2DROS("global_costmap", tf_);
     planner_costmap_ros_->pause();
-
     //initialize the global planner
     try {
       planner_ = bgp_loader_.createInstance(global_planner);
@@ -126,7 +146,7 @@ namespace move_base {
     //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
     controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
     controller_costmap_ros_->pause();
-
+       
     //create a local planner
     try {
       tc_ = blp_loader_.createInstance(local_planner);
@@ -489,11 +509,11 @@ namespace move_base {
   }
 
   void MoveBase::publishZeroVelocity(){
-    geometry_msgs::Twist cmd_vel;
-    cmd_vel.linear.x = 0.0;
-    cmd_vel.linear.y = 0.0;
-    cmd_vel.angular.z = 0.0;
-    vel_pub_.publish(cmd_vel);
+    geometry_msgs::TwistStamped cmd_vel_stamped;
+    cmd_vel_stamped.twist.linear.x = 0.0;
+    cmd_vel_stamped.twist.linear.y = 0.0;
+    cmd_vel_stamped.twist.angular.z = 0.0;
+    vel_pub_.publish(cmd_vel_stamped);
   }
 
   bool MoveBase::isQuaternionValid(const geometry_msgs::Quaternion& q){
@@ -902,7 +922,11 @@ namespace move_base {
                            cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z );
           last_valid_control_ = ros::Time::now();
           //make sure that we send the velocity command to the base
-          vel_pub_.publish(cmd_vel);
+          geometry_msgs::TwistStamped cmd_vel_stamped;
+          cmd_vel_stamped.twist.linear.x = cmd_vel.linear.x;
+          cmd_vel_stamped.twist.linear.y = cmd_vel.linear.y;
+          cmd_vel_stamped.twist.angular.z = cmd_vel.angular.z;
+          vel_pub_.publish(cmd_vel_stamped);
           if(recovery_trigger_ == CONTROLLING_R)
             recovery_index_ = 0;
         }

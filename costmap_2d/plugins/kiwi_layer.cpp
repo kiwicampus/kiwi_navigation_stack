@@ -186,14 +186,6 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
         continue;
       }
 
-        // RDEUBER: Mark the plane as FREE_SPACE and continue
-      if ((*iter_z < 0.05) && ((*iter_z > -0.05)))
-      {
-        unsigned int index = getIndex(mx, my);
-        costmap_[index] = FREE_SPACE;
-        continue;
-      }
-
       // mark the cell in the voxel grid and check if we should also mark it in the costmap
       if (voxel_grid_.markVoxelInMap(mx, my, mz, mark_threshold_))
       {
