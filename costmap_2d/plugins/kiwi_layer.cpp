@@ -119,14 +119,10 @@ void KiwiLayer::resetMaps()
 void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                        double* min_y, double* max_x, double* max_y)
 {
-  ros::WallTime start_update_bounds, end_update_bounds;
-  start_update_bounds = ros::WallTime::now();
-
   // RDEUBER: We don't care about the costmap in the back of the robot (because
   // there are no sensor measuremtns anyway). CHANGE THAT here and everywhere
   // else! 
   if (rolling_window_)
-    //updateOrigin(robot_x - 1.0, robot_y - getSizeInMetersY() / 2);
     updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
   if (!enabled_)
     return;
@@ -190,22 +186,6 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
         continue;
       }
 
-      //ONLY TEMPORARY!!!!!!!!!!!!!!!!!!!!!
-      //continue;
-      //ONLY TEMPORARY!!!!!!!!!!!!!!!!!!!!!
-
-        // RDEUBER: Mark the plane as FREE_SPACE and continue
-        /*
-      if ((*iter_z < 0.10) && ((*iter_z > -0.10)))
-      {
-        // unsigned int index = getIndex(mx, my);
-        // if (!costmap_[index] == LETHAL_OBSTACLE) {
-         // costmap_[index] = LETHAL_OBSTACLE;
-        // }
-        continue;
-      }
-      */
-
       // mark the cell in the voxel grid and check if we should also mark it in the costmap
       if (voxel_grid_.markVoxelInMap(mx, my, mz, mark_threshold_))
       {
@@ -240,9 +220,6 @@ void KiwiLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, d
   }
 
   updateFootprint(robot_x, robot_y, robot_yaw, min_x, min_y, max_x, max_y);
-  end_update_bounds = ros::WallTime::now();
-  double execution_time = (end_update_bounds - start_update_bounds).toNSec() * 1e-6;
-  // ROS_WARN_STREAM("gridmap generation (ms): " << execution_time);
 }
 
 void KiwiLayer::clearNonLethal(double wx, double wy, double w_size_x, double w_size_y, bool clear_no_info)
